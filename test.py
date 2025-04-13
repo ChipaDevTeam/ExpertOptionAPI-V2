@@ -7,7 +7,7 @@ async def main():
     api = ExpertOptionApiV2(TOKEN, server_region="wss://fr24g1eu.expertoption.finance/ws/v40")
     await api.connect()
 
-    print(api.GetSingleCandles())
+    print(await api.GetBalance())
 
 if __name__ == '__main__':
     asyncio.run(main())

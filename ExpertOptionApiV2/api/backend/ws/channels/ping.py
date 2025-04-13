@@ -1,5 +1,5 @@
 """Module for ExpertOption ping websocket chanel."""
-from ExpertOptionAPI.api.backend.ws.channels.base import Base
+from ExpertOptionApiV2.api.backend.ws.channels.base import Base
 
 
 class Ping(Base):

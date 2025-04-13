@@ -18,3 +18,4 @@ is_GetassetHistoryCandles = False
 assetHistoryCandles = None
 ErrorData = None
 SingleCandleData = None
+is_demo = True

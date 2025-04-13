@@ -21,24 +21,27 @@ import ExpertOptionApiV2.api.global_values as global_value
 from ExpertOptionApiV2.api.constants import BasicData, Symbols
 
 class ExpertOptionApiV2:
-    def __init__(self, token: str, server_region = None, *args, **kwargs):
+    def __init__(self, token: str, server_region=None, log_enabled=False, Demo=True, *args, **kwargs):
         self.token = token
         self.server_region = server_region
         self.utli = _Utils()
 
         self.websocket_client = WebSocketClient(api=self, token=self.token)  # Composition
-        # Set logging level and format
+
+        # Set up logger
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        if log_enabled:
+            self.logger.setLevel(logging.INFO)
+            formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
-        # Create file handler and add it to the logger
-        file_handler = logging.FileHandler('expert.log')
-        file_handler.setFormatter(formatter)
-        self.logger.addHandler(file_handler)
+            file_handler = logging.FileHandler('expert.log')
+            file_handler.setFormatter(formatter)
+            self.logger.addHandler(file_handler)
 
-
-        self.logger.info("Initializing ExpertOptionApiV2 with token: %s, region: %s", token, server_region)
+            self.logger.info("Logging enabled.")
+            self.logger.info("Initializing ExpertOptionApiV2 with token: %s, region: %s", token, server_region)
+        else:
+            self.logger.disabled = True
 
         self.websocket_thread = None
         self.profile = None
@@ -48,16 +51,27 @@ class ExpertOptionApiV2:
         self.msg_by_ns = self.FixSizeOrderedDict(max=300)
         self.msg_by_action = self.nested_dict(1, lambda: self.FixSizeOrderedDict(max=300))
 
-        self.ping_thread = threading.Thread(target=self.auto_ping)  # Create a new thread for auto_ping
-        self.ping_thread.daemon = True  # Set the thread as a daemon so it will terminate when the main program terminates
-        self.ping_thread.start()  # Start the auto_ping thread
+        self.ping_thread = threading.Thread(target=self.auto_ping)
+        self.ping_thread.daemon = True
+        self.ping_thread.start()
 
         # self.websocket_client.wss.run_forever()
 
+        if not Demo:
+            global_value.is_demo = False
+
+    async def GetBalance(self):
+        await self.Profile()
+        balance = None
+        if global_value.is_demo:
+            balance = global_value.ProfileData["message"]["profile"]["demo_balance"]
+        elif not global_value.is_demo:
+            balance = global_value.ProfileData
+        return balance
     async def Profile(self):
         self.logger.info("Fetching profile")
         global_value.is_profile = True
-        self.send_websocket_request(action="multipleAction",
+        await self.send_websocket_request(action="multipleAction",
                                     msg=BasicData.SendData(self),
                                     ns="_common")
         return global_value.ProfileData
@@ -154,7 +168,7 @@ class ExpertOptionApiV2:
             return global_value.BuyData
     async def SetDemo(self):
         data = {"action":"setContext","message":{"is_demo":1},"token": self.token,"ns":1}
-        self.send_websocket_request(action="setContext", msg=data, ns="_common")
+        await self.send_websocket_request(action="setContext", msg=data, ns="_common")
         return True
     async def GetSingleCandles(self):
         # Starting interval of 300 seconds
@@ -176,7 +190,7 @@ class ExpertOptionApiV2:
             # Add the period to the list
             desired_periods.append([rounded_timestamp, rounded_timestamp + round_interval])
         data = {"action":"assetHistoryCandles","message":{"assetid":240,"periods":desired_periods,"timeframes":[5]},"token":self.token,"ns":27}
-        self.send_websocket_request(action="assetHistoryCandles", msg=data)
+        await self.send_websocket_request(action="assetHistoryCandles", msg=data)
         return global_value.SingleCandleData
     
     async def GetMultipleCandlesFromNow(self, interval: int = 10):
@@ -250,7 +264,7 @@ class ExpertOptionApiV2:
                 pass
             pass
 
-        self.send_websocket_request(action="multipleAction",
+        await self.send_websocket_request(action="multipleAction",
                                     msg={"token": self.token, "v": 18, "action": "multipleAction",
                                          "message": {"token": self.token, "actions": [
                                              {"action": "getCountries", "message": None, "ns": None, "v": 18,
@@ -379,11 +393,11 @@ class ExpertOptionApiV2:
             "ns": 4
         }
 
-        self.SetDemo()
+        await self.SetDemo()
 
-        self.send_websocket_request(action="multipleAction", msg=data2)
+        await self.send_websocket_request(action="multipleAction", msg=data2)
 
-        self.send_websocket_request(action="multipleAction", msg=data)
+        await self.send_websocket_request(action="multipleAction", msg=data)
 
         start_t = time.time()
         self.logger.info("WebSocket connected")
