@@ -55,7 +55,7 @@ class ExpertOptionApiV2:
         self.ping_thread.daemon = True
         self.ping_thread.start()
 
-        # self.websocket_client.wss.run_forever()
+        self.websocket_client.wss.run_forever()
 
         if not Demo:
             global_value.is_demo = False
@@ -115,7 +115,7 @@ class ExpertOptionApiV2:
         self.send_websocket_request(action="assetHistoryCandles", msg=data)
         return global_value.SingleCandleData
 
-    async def Buy(self, amount: int = 1, type: str = "call", assetid: int = 240, exptime: int = 60, isdemo: int = 1, strike_time: int = int(time.time())):
+    async def PlaceOrder(self, amount: int = 1, type: str = "call", assetid: int = 240, exptime: int = 60, isdemo: int = 1, strike_time: int = int(time.time())):
     # Your method implementation here
         try:
             self.logger.info("Buying...")
