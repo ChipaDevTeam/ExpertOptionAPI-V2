@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
 ### 🔐 Disclaimer
 
-Use this code responsibly and ensure you comply with the ExpertOption API Terms of Use. This is a simplified example and should not be used in production without further error handling and security checks.
+Use this code responsibly and ensure you comply with the ExpertOption Terms of Use. This is a simplified example and should not be used in production without further error handling and security checks.
 
 ---
 
