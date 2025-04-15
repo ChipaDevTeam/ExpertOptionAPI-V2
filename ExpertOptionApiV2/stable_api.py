@@ -125,7 +125,7 @@ class ExpertOptionApiV2:
             exptime_ = self.utli.roundTimeToTimestamp(dt=None, roundTo=exptime)
             print(f"The exp_time is: {int(exptime_)}")
             try:
-                await self.send_websocket_request(action="BuyOption", msg={"action":"buyOption","message":{"type":f"{type}","amount":amount,"assetid":assetid,"strike_time":strike_time,"expiration_time":int(exptime_),"is_demo":isdemo,"rateIndex":1},"token":f"{self.token}","ns":44})
+                await self.send_websocket_request(action="BuyOption", msg={"action":"buyOption","message":{"type":"call","amount":amount,"assetid":assetid,"strike_time":strike_time,"is_demo":isdemo,"expiration_shift":exptime,"ratePosition":0},"token":self.token,"ns":19})
                 if global_value.ErrorData == "ERROR_EXPIRATION_INVALID":
                     await self.send_websocket_request(action="BuyOption", msg={"action":"buyOption","message":{"type":f"{type}","amount":amount,"assetid":assetid,"strike_time":strike_time,"expiration_time":int(exptime_),"is_demo":isdemo,"rateIndex":1},"token":f"{self.token}","ns":44})
                     global_value.ErrorData = None

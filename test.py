@@ -8,7 +8,7 @@ async def main():
     await api.connect()
 
     #print(await api.GetBalance()) # ✅ works!
-    print(await api.PlaceOrder(amount=1, type="call", assetid=240, exptime=60, isdemo=1)) # ❌ Does not work
+    print(await api.PlaceOrder(amount=1, type="call", assetid=240, exptime=30, isdemo=1)) # ❌ Does not work
     # print(await api.GetSingleCandles()) # ✅ works!
 
 if __name__ == '__main__':
