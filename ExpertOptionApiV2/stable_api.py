@@ -121,22 +121,19 @@ class ExpertOptionApiV2:
             self.logger.info("Buying...")
             print("Buying...") # replace in prod
             if isdemo == 1:
-                self.SetDemo()
+                await self.SetDemo()
             exptime_ = self.utli.roundTimeToTimestamp(dt=None, roundTo=exptime)
             print(f"The exp_time is: {int(exptime_)}")
             try:
                 await self.send_websocket_request(action="BuyOption", msg={"action":"buyOption","message":{"type":f"{type}","amount":amount,"assetid":assetid,"strike_time":strike_time,"expiration_time":int(exptime_),"is_demo":isdemo,"rateIndex":1},"token":f"{self.token}","ns":44})
-                await asyncio.sleep(5)
                 if global_value.ErrorData == "ERROR_EXPIRATION_INVALID":
                     await self.send_websocket_request(action="BuyOption", msg={"action":"buyOption","message":{"type":f"{type}","amount":amount,"assetid":assetid,"strike_time":strike_time,"expiration_time":int(exptime_),"is_demo":isdemo,"rateIndex":1},"token":f"{self.token}","ns":44})
                     global_value.ErrorData = None
-                    await asyncio.sleep(5)
                     if global_value.ErrorData == "ERROR_EXPIRATION_INVALID":
                         attempts = 10
                         for attempt in range(attempts):
                             await self.send_websocket_request(action="BuyOption", msg={"action":"buyOption","message":{"type":f"{type}","amount":amount,"assetid":assetid,"strike_time":strike_time,"expiration_time":int(exptime_),"is_demo":isdemo,"rateIndex":1},"token":f"{self.token}","ns":44})
                             global_value.ErrorData = None
-                            await asyncio.sleep(3)
                             if global_value.ErrorData == None:
                                 return global_value.BuyData
                 
@@ -146,7 +143,6 @@ class ExpertOptionApiV2:
                     exp_time_v2 = self.utli.roundTimeToTimestamp(dt=None, roundTo=60)
                     await self.send_websocket_request(action="BuyOption", msg={"action":"buyOption","message":{"type":f"{type}","amount":amount,"assetid":assetid,"strike_time":strike_time,"expiration_time":int(exp_time_v2),"is_demo":isdemo,"rateIndex":1},"token":f"{self.token}","ns":44})
                     try:
-                        await asyncio.sleep(10)
                         return global_value.BuyData
                     except BuyingExpirationInvalid as e2:
                         print(f"Still got the error: {e2}")
@@ -157,7 +153,6 @@ class ExpertOptionApiV2:
             self.logger.info("Buying...")
             print("Buying...") # replace in prod
             await self.send_websocket_request(action="BuyOption", msg=BasicData.BuyData(self=self, amount=amount, type=type, assetid=assetid, exptime=exptime, isdemo=isdemo, strike_time=strike_time), ns=300)
-            await asyncio.sleep(5)
             if global_value.ErrorData == "ERROR_EXPIRATION_INVALID":
                 try:
                     await self.send_websocket_request(action="BuyOption", msg=BasicData.BuyData(self=self, amount=amount, type=type, assetid=assetid, exptime=exptime, isdemo=isdemo, strike_time=strike_time), ns=300)
